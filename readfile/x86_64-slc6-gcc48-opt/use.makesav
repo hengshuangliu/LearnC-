@@ -1,0 +1,287 @@
+#-- start of make_header -----------------
+
+#====================================
+#  Application use
+#
+#   Generated Sun Sep 20 16:23:51 2015  by shuang
+#
+#====================================
+
+include ${CMTROOT}/src/Makefile.core
+
+ifdef tag
+CMTEXTRATAGS = $(tag)
+else
+tag       = $(CMTCONFIG)
+endif
+
+cmt_use_has_no_target_tag = 1
+
+#--------------------------------------------------------
+
+ifdef cmt_use_has_target_tag
+
+tags      = $(tag),$(CMTEXTRATAGS),target_use
+
+readfile_tag = $(tag)
+
+#cmt_local_tagfile_use = $(readfile_tag)_use.make
+cmt_local_tagfile_use = $(bin)$(readfile_tag)_use.make
+
+else
+
+tags      = $(tag),$(CMTEXTRATAGS)
+
+readfile_tag = $(tag)
+
+#cmt_local_tagfile_use = $(readfile_tag).make
+cmt_local_tagfile_use = $(bin)$(readfile_tag).make
+
+endif
+
+include $(cmt_local_tagfile_use)
+#-include $(cmt_local_tagfile_use)
+
+ifdef cmt_use_has_target_tag
+
+cmt_final_setup_use = $(bin)setup_use.make
+#cmt_final_setup_use = $(bin)readfile_usesetup.make
+cmt_local_use_makefile = $(bin)use.make
+
+else
+
+cmt_final_setup_use = $(bin)setup.make
+#cmt_final_setup_use = $(bin)readfilesetup.make
+cmt_local_use_makefile = $(bin)use.make
+
+endif
+
+cmt_final_setup = $(bin)setup.make
+#cmt_final_setup = $(bin)readfilesetup.make
+
+#use :: ;
+
+dirs ::
+	@if test ! -r requirements ; then echo "No requirements file" ; fi; \
+	  if test ! -d $(bin) ; then $(mkdir) -p $(bin) ; fi
+
+javadirs ::
+	@if test ! -d $(javabin) ; then $(mkdir) -p $(javabin) ; fi
+
+srcdirs ::
+	@if test ! -d $(src) ; then $(mkdir) -p $(src) ; fi
+
+help ::
+	$(echo) 'use'
+
+binobj = 
+ifdef STRUCTURED_OUTPUT
+binobj = use/
+#use::
+#	@if test ! -d $(bin)$(binobj) ; then $(mkdir) -p $(bin)$(binobj) ; fi
+#	$(echo) "STRUCTURED_OUTPUT="$(bin)$(binobj)
+endif
+
+ifdef use_requirements
+$(use_requirements) : ;
+endif
+
+#-- end of make_header ------------------
+#-- start of application_header
+
+use :: dirs  $(bin)use${application_suffix}
+	$(echo) "use ok"
+
+#-- end of application_header
+#-- start of application
+
+$(bin)use${application_suffix} :: $(bin)configuration.o $(bin)key_value.o $(bin)use.o $(use_stamps) $(use_stamps) $(usestamps) $(use_requirements)
+	$(link_echo) "application $@"
+	$(link_silent) $(cpplink) -o $(@).new $(bin)configuration.o $(bin)key_value.o $(bin)use.o $(cmt_installarea_linkopts) $(use_use_linkopts) $(uselinkopts) && mv -f $(@).new $(@)
+
+#-----------------------------------------------------------------
+#
+#  New section for automatic installation
+#
+#-----------------------------------------------------------------
+
+install_dir = ${CMTINSTALLAREA}/$(tag)/bin
+useinstallname = use${application_suffix}
+
+use :: useinstall
+
+install :: useinstall
+
+useinstall :: $(install_dir)/$(useinstallname)
+ifdef CMTINSTALLAREA
+	$(echo) "installation done"
+endif
+
+$(install_dir)/$(useinstallname) :: $(bin)$(useinstallname)
+ifdef CMTINSTALLAREA
+	$(install_silent) $(cmt_install_action) \
+	    -source "`(cd $(bin); pwd)`" \
+	    -name "$(useinstallname)" \
+	    -out "$(install_dir)" \
+	    -cmd "$(cmt_installarea_command)" \
+	    -cmtpath "$($(package)_cmtpath)"
+endif
+
+##useclean :: useuninstall
+
+uninstall :: useuninstall
+
+useuninstall ::
+ifdef CMTINSTALLAREA
+	$(cleanup_silent) $(cmt_uninstall_action) \
+	    -source "`(cd $(bin); pwd)`" \
+	    -name "$(useinstallname)" \
+	    -out "$(install_dir)" \
+	    -cmtpath "$($(package)_cmtpath)"
+endif
+
+#	@echo "------> (use.make) Removing installed files"
+#-- end of application
+#-- start of dependency ------------------
+ifneq ($(MAKECMDGOALS),useclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+
+#$(bin)use_dependencies.make :: dirs
+
+ifndef QUICK
+$(bin)use_dependencies.make : $(src)configuration.cpp $(src)key_value.cpp $(src)use.cpp $(use_requirements) $(cmt_final_setup_use)
+	$(echo) "(use.make) Rebuilding $@"; \
+	  $(build_dependencies) use -all_sources -out=$@ $(src)configuration.cpp $(src)key_value.cpp $(src)use.cpp
+endif
+
+#$(use_dependencies)
+
+-include $(bin)use_dependencies.make
+
+endif
+endif
+#-- end of dependency -------------------
+#-- start of cpp ------
+
+ifneq ($(cppdepflags),)
+
+ifneq ($(MAKECMDGOALS),useclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+-include $(bin)$(binobj)configuration.d
+
+$(bin)$(binobj)configuration.d : $(use_requirements) $(cmt_final_setup_use)
+
+$(bin)$(binobj)configuration.d : $(src)configuration.cpp
+	$(dep_echo) $@
+	$(cpp_silent) $(cppcomp) $(cppdepflags) -o $(@D)/configuration.dep $(use_pp_cppflags) $(use_pp_cppflags) $(app_use_pp_cppflags) $(configuration_pp_cppflags) $(use_cppflags) $(use_cppflags) $(app_use_cppflags) $(configuration_cppflags) $(configuration_cpp_cppflags)  $(src)configuration.cpp
+	$(cpp_silent) $(format_dependencies) $@ $(@D)/configuration.o $(src)configuration.cpp $(@D)/configuration.dep
+endif
+endif
+
+$(bin)$(binobj)configuration.o : $(src)configuration.cpp
+else
+$(bin)use_dependencies.make : $(configuration_cpp_dependencies)
+
+$(bin)$(binobj)configuration.o : $(configuration_cpp_dependencies)
+endif
+	$(cpp_echo) $(src)configuration.cpp
+	$(cpp_silent) $(cppcomp) -o $@ $(use_pp_cppflags) $(use_pp_cppflags) $(app_use_pp_cppflags) $(configuration_pp_cppflags) $(use_cppflags) $(use_cppflags) $(app_use_cppflags) $(configuration_cppflags) $(configuration_cpp_cppflags)  $(src)configuration.cpp
+
+#-- end of cpp ------
+#-- start of cpp ------
+
+ifneq ($(cppdepflags),)
+
+ifneq ($(MAKECMDGOALS),useclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+-include $(bin)$(binobj)key_value.d
+
+$(bin)$(binobj)key_value.d : $(use_requirements) $(cmt_final_setup_use)
+
+$(bin)$(binobj)key_value.d : $(src)key_value.cpp
+	$(dep_echo) $@
+	$(cpp_silent) $(cppcomp) $(cppdepflags) -o $(@D)/key_value.dep $(use_pp_cppflags) $(use_pp_cppflags) $(app_use_pp_cppflags) $(key_value_pp_cppflags) $(use_cppflags) $(use_cppflags) $(app_use_cppflags) $(key_value_cppflags) $(key_value_cpp_cppflags)  $(src)key_value.cpp
+	$(cpp_silent) $(format_dependencies) $@ $(@D)/key_value.o $(src)key_value.cpp $(@D)/key_value.dep
+endif
+endif
+
+$(bin)$(binobj)key_value.o : $(src)key_value.cpp
+else
+$(bin)use_dependencies.make : $(key_value_cpp_dependencies)
+
+$(bin)$(binobj)key_value.o : $(key_value_cpp_dependencies)
+endif
+	$(cpp_echo) $(src)key_value.cpp
+	$(cpp_silent) $(cppcomp) -o $@ $(use_pp_cppflags) $(use_pp_cppflags) $(app_use_pp_cppflags) $(key_value_pp_cppflags) $(use_cppflags) $(use_cppflags) $(app_use_cppflags) $(key_value_cppflags) $(key_value_cpp_cppflags)  $(src)key_value.cpp
+
+#-- end of cpp ------
+#-- start of cpp ------
+
+ifneq ($(cppdepflags),)
+
+ifneq ($(MAKECMDGOALS),useclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+-include $(bin)$(binobj)use.d
+
+$(bin)$(binobj)use.d : $(use_requirements) $(cmt_final_setup_use)
+
+$(bin)$(binobj)use.d : $(src)use.cpp
+	$(dep_echo) $@
+	$(cpp_silent) $(cppcomp) $(cppdepflags) -o $(@D)/use.dep $(use_pp_cppflags) $(use_pp_cppflags) $(app_use_pp_cppflags) $(use_pp_cppflags) $(use_cppflags) $(use_cppflags) $(app_use_cppflags) $(use_cppflags) $(use_cpp_cppflags)  $(src)use.cpp
+	$(cpp_silent) $(format_dependencies) $@ $(@D)/use.o $(src)use.cpp $(@D)/use.dep
+endif
+endif
+
+$(bin)$(binobj)use.o : $(src)use.cpp
+else
+$(bin)use_dependencies.make : $(use_cpp_dependencies)
+
+$(bin)$(binobj)use.o : $(use_cpp_dependencies)
+endif
+	$(cpp_echo) $(src)use.cpp
+	$(cpp_silent) $(cppcomp) -o $@ $(use_pp_cppflags) $(use_pp_cppflags) $(app_use_pp_cppflags) $(use_pp_cppflags) $(use_cppflags) $(use_cppflags) $(app_use_cppflags) $(use_cppflags) $(use_cpp_cppflags)  $(src)use.cpp
+
+#-- end of cpp ------
+#-- start of cleanup_header --------------
+
+clean :: useclean ;
+#	@cd .
+
+ifndef PEDANTIC
+.DEFAULT::
+	$(echo) "(use.make) $@: No rule for such target" >&2
+#	@echo "#CMT> Warning: $@: No rule for such target" >&2; exit
+	if echo $@ | grep '$(package)setup\.make$$' >/dev/null; then\
+	 echo "$(CMTMSGPREFIX)" "(use.make): $@: File no longer generated" >&2; exit 0; fi
+else
+.DEFAULT::
+	$(echo) "(use.make) PEDANTIC: $@: No rule for such target" >&2
+	if echo $@ | grep '$(package)setup\.make$$' >/dev/null; then\
+	 echo "$(CMTMSGPREFIX)" "(use.make): $@: File no longer generated" >&2; exit 0;\
+	 elif test $@ = "$(cmt_final_setup)" -o\
+	 $@ = "$(cmt_final_setup_use)" ; then\
+	 found=n; for s in 1 2 3 4 5; do\
+	 sleep $$s; test ! -f $@ || { found=y; break; }\
+	 done; if test $$found = n; then\
+	 test -z "$(cmtmsg)" ||\
+	 echo "$(CMTMSGPREFIX)" "(use.make) PEDANTIC: $@: Seems to be missing. Ignore it for now" >&2; exit 0 ; fi;\
+	 elif test `expr $@ : '.*/'` -ne 0 ; then\
+	 test -z "$(cmtmsg)" ||\
+	 echo "$(CMTMSGPREFIX)" "(use.make) PEDANTIC: $@: Seems to be a missing file. Please check" >&2; exit 2 ; \
+	 else\
+	 test -z "$(cmtmsg)" ||\
+	 echo "$(CMTMSGPREFIX)" "(use.make) PEDANTIC: $@: Seems to be a fake target due to some pattern. Just ignore it" >&2 ; exit 0; fi
+endif
+
+useclean ::
+#-- end of cleanup_header ---------------
+#-- start of cleanup_application ------
+	$(cleanup_echo) application use
+	-$(cleanup_silent) cd $(bin); /bin/rm -f use${application_suffix}
+#-- end of cleanup_application ------
+#-- start of cleanup_objects ------
+	$(cleanup_echo) objects use
+	-$(cleanup_silent) /bin/rm -f $(bin)configuration.o $(bin)key_value.o $(bin)use.o
+	-$(cleanup_silent) /bin/rm -f $(patsubst %.o,%.d,$(bin)configuration.o $(bin)key_value.o $(bin)use.o) $(patsubst %.o,%.dep,$(bin)configuration.o $(bin)key_value.o $(bin)use.o) $(patsubst %.o,%.d.stamp,$(bin)configuration.o $(bin)key_value.o $(bin)use.o)
+	-$(cleanup_silent) cd $(bin); /bin/rm -rf use_deps use_dependencies.make
+#-- end of cleanup_objects ------

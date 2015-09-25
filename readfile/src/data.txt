@@ -1,0 +1,7 @@
+
+-valueA 12 -valueB 30 	useless information
+	53 -valueD 45	useless information
+
+-valueE 2o	-valueF	78	useless information
+-valueG   	-valueH	3	useless information
+-valueI 39

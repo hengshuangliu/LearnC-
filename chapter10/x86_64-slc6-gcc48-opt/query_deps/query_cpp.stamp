@@ -1,0 +1,1 @@
+query_cpp_dependencies =  ../src/query.cpp   ../src/TextQuery.h  $(bin)query_deps/query_cpp.stamp

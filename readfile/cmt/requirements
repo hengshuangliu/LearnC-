@@ -1,0 +1,5 @@
+package readfile
+
+
+##application testconfig configuration.cpp testconfig.cpp
+application use configuration.cpp key_value.cpp use.cpp

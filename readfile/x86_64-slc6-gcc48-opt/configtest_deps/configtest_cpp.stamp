@@ -1,0 +1,1 @@
+configtest_cpp_dependencies =  ../src/configtest.cpp  $(bin)configtest_deps/configtest_cpp.stamp

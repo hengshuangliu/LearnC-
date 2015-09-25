@@ -1,0 +1,3 @@
+package chapter10
+
+application query query.cpp TextQuery.cpp

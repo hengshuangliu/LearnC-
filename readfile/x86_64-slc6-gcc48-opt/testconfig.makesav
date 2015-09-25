@@ -1,0 +1,260 @@
+#-- start of make_header -----------------
+
+#====================================
+#  Application testconfig
+#
+#   Generated Sat Sep 19 17:09:07 2015  by shuang
+#
+#====================================
+
+include ${CMTROOT}/src/Makefile.core
+
+ifdef tag
+CMTEXTRATAGS = $(tag)
+else
+tag       = $(CMTCONFIG)
+endif
+
+cmt_testconfig_has_no_target_tag = 1
+
+#--------------------------------------------------------
+
+ifdef cmt_testconfig_has_target_tag
+
+tags      = $(tag),$(CMTEXTRATAGS),target_testconfig
+
+readfile_tag = $(tag)
+
+#cmt_local_tagfile_testconfig = $(readfile_tag)_testconfig.make
+cmt_local_tagfile_testconfig = $(bin)$(readfile_tag)_testconfig.make
+
+else
+
+tags      = $(tag),$(CMTEXTRATAGS)
+
+readfile_tag = $(tag)
+
+#cmt_local_tagfile_testconfig = $(readfile_tag).make
+cmt_local_tagfile_testconfig = $(bin)$(readfile_tag).make
+
+endif
+
+include $(cmt_local_tagfile_testconfig)
+#-include $(cmt_local_tagfile_testconfig)
+
+ifdef cmt_testconfig_has_target_tag
+
+cmt_final_setup_testconfig = $(bin)setup_testconfig.make
+#cmt_final_setup_testconfig = $(bin)readfile_testconfigsetup.make
+cmt_local_testconfig_makefile = $(bin)testconfig.make
+
+else
+
+cmt_final_setup_testconfig = $(bin)setup.make
+#cmt_final_setup_testconfig = $(bin)readfilesetup.make
+cmt_local_testconfig_makefile = $(bin)testconfig.make
+
+endif
+
+cmt_final_setup = $(bin)setup.make
+#cmt_final_setup = $(bin)readfilesetup.make
+
+#testconfig :: ;
+
+dirs ::
+	@if test ! -r requirements ; then echo "No requirements file" ; fi; \
+	  if test ! -d $(bin) ; then $(mkdir) -p $(bin) ; fi
+
+javadirs ::
+	@if test ! -d $(javabin) ; then $(mkdir) -p $(javabin) ; fi
+
+srcdirs ::
+	@if test ! -d $(src) ; then $(mkdir) -p $(src) ; fi
+
+help ::
+	$(echo) 'testconfig'
+
+binobj = 
+ifdef STRUCTURED_OUTPUT
+binobj = testconfig/
+#testconfig::
+#	@if test ! -d $(bin)$(binobj) ; then $(mkdir) -p $(bin)$(binobj) ; fi
+#	$(echo) "STRUCTURED_OUTPUT="$(bin)$(binobj)
+endif
+
+ifdef use_requirements
+$(use_requirements) : ;
+endif
+
+#-- end of make_header ------------------
+#-- start of application_header
+
+testconfig :: dirs  $(bin)testconfig${application_suffix}
+	$(echo) "testconfig ok"
+
+#-- end of application_header
+#-- start of application
+
+$(bin)testconfig${application_suffix} :: $(bin)configuration.o $(bin)testconfig.o $(use_stamps) $(testconfig_stamps) $(testconfigstamps) $(use_requirements)
+	$(link_echo) "application $@"
+	$(link_silent) $(cpplink) -o $(@).new $(bin)configuration.o $(bin)testconfig.o $(cmt_installarea_linkopts) $(testconfig_use_linkopts) $(testconfiglinkopts) && mv -f $(@).new $(@)
+
+#-----------------------------------------------------------------
+#
+#  New section for automatic installation
+#
+#-----------------------------------------------------------------
+
+install_dir = ${CMTINSTALLAREA}/$(tag)/bin
+testconfiginstallname = testconfig${application_suffix}
+
+testconfig :: testconfiginstall
+
+install :: testconfiginstall
+
+testconfiginstall :: $(install_dir)/$(testconfiginstallname)
+ifdef CMTINSTALLAREA
+	$(echo) "installation done"
+endif
+
+$(install_dir)/$(testconfiginstallname) :: $(bin)$(testconfiginstallname)
+ifdef CMTINSTALLAREA
+	$(install_silent) $(cmt_install_action) \
+	    -source "`(cd $(bin); pwd)`" \
+	    -name "$(testconfiginstallname)" \
+	    -out "$(install_dir)" \
+	    -cmd "$(cmt_installarea_command)" \
+	    -cmtpath "$($(package)_cmtpath)"
+endif
+
+##testconfigclean :: testconfiguninstall
+
+uninstall :: testconfiguninstall
+
+testconfiguninstall ::
+ifdef CMTINSTALLAREA
+	$(cleanup_silent) $(cmt_uninstall_action) \
+	    -source "`(cd $(bin); pwd)`" \
+	    -name "$(testconfiginstallname)" \
+	    -out "$(install_dir)" \
+	    -cmtpath "$($(package)_cmtpath)"
+endif
+
+#	@echo "------> (testconfig.make) Removing installed files"
+#-- end of application
+#-- start of dependency ------------------
+ifneq ($(MAKECMDGOALS),testconfigclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+
+#$(bin)testconfig_dependencies.make :: dirs
+
+ifndef QUICK
+$(bin)testconfig_dependencies.make : $(src)configuration.cpp $(src)testconfig.cpp $(use_requirements) $(cmt_final_setup_testconfig)
+	$(echo) "(testconfig.make) Rebuilding $@"; \
+	  $(build_dependencies) testconfig -all_sources -out=$@ $(src)configuration.cpp $(src)testconfig.cpp
+endif
+
+#$(testconfig_dependencies)
+
+-include $(bin)testconfig_dependencies.make
+
+endif
+endif
+#-- end of dependency -------------------
+#-- start of cpp ------
+
+ifneq ($(cppdepflags),)
+
+ifneq ($(MAKECMDGOALS),testconfigclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+-include $(bin)$(binobj)configuration.d
+
+$(bin)$(binobj)configuration.d : $(use_requirements) $(cmt_final_setup_testconfig)
+
+$(bin)$(binobj)configuration.d : $(src)configuration.cpp
+	$(dep_echo) $@
+	$(cpp_silent) $(cppcomp) $(cppdepflags) -o $(@D)/configuration.dep $(use_pp_cppflags) $(testconfig_pp_cppflags) $(app_testconfig_pp_cppflags) $(configuration_pp_cppflags) $(use_cppflags) $(testconfig_cppflags) $(app_testconfig_cppflags) $(configuration_cppflags) $(configuration_cpp_cppflags)  $(src)configuration.cpp
+	$(cpp_silent) $(format_dependencies) $@ $(@D)/configuration.o $(src)configuration.cpp $(@D)/configuration.dep
+endif
+endif
+
+$(bin)$(binobj)configuration.o : $(src)configuration.cpp
+else
+$(bin)testconfig_dependencies.make : $(configuration_cpp_dependencies)
+
+$(bin)$(binobj)configuration.o : $(configuration_cpp_dependencies)
+endif
+	$(cpp_echo) $(src)configuration.cpp
+	$(cpp_silent) $(cppcomp) -o $@ $(use_pp_cppflags) $(testconfig_pp_cppflags) $(app_testconfig_pp_cppflags) $(configuration_pp_cppflags) $(use_cppflags) $(testconfig_cppflags) $(app_testconfig_cppflags) $(configuration_cppflags) $(configuration_cpp_cppflags)  $(src)configuration.cpp
+
+#-- end of cpp ------
+#-- start of cpp ------
+
+ifneq ($(cppdepflags),)
+
+ifneq ($(MAKECMDGOALS),testconfigclean)
+ifneq ($(MAKECMDGOALS),uninstall)
+-include $(bin)$(binobj)testconfig.d
+
+$(bin)$(binobj)testconfig.d : $(use_requirements) $(cmt_final_setup_testconfig)
+
+$(bin)$(binobj)testconfig.d : $(src)testconfig.cpp
+	$(dep_echo) $@
+	$(cpp_silent) $(cppcomp) $(cppdepflags) -o $(@D)/testconfig.dep $(use_pp_cppflags) $(testconfig_pp_cppflags) $(app_testconfig_pp_cppflags) $(testconfig_pp_cppflags) $(use_cppflags) $(testconfig_cppflags) $(app_testconfig_cppflags) $(testconfig_cppflags) $(testconfig_cpp_cppflags)  $(src)testconfig.cpp
+	$(cpp_silent) $(format_dependencies) $@ $(@D)/testconfig.o $(src)testconfig.cpp $(@D)/testconfig.dep
+endif
+endif
+
+$(bin)$(binobj)testconfig.o : $(src)testconfig.cpp
+else
+$(bin)testconfig_dependencies.make : $(testconfig_cpp_dependencies)
+
+$(bin)$(binobj)testconfig.o : $(testconfig_cpp_dependencies)
+endif
+	$(cpp_echo) $(src)testconfig.cpp
+	$(cpp_silent) $(cppcomp) -o $@ $(use_pp_cppflags) $(testconfig_pp_cppflags) $(app_testconfig_pp_cppflags) $(testconfig_pp_cppflags) $(use_cppflags) $(testconfig_cppflags) $(app_testconfig_cppflags) $(testconfig_cppflags) $(testconfig_cpp_cppflags)  $(src)testconfig.cpp
+
+#-- end of cpp ------
+#-- start of cleanup_header --------------
+
+clean :: testconfigclean ;
+#	@cd .
+
+ifndef PEDANTIC
+.DEFAULT::
+	$(echo) "(testconfig.make) $@: No rule for such target" >&2
+#	@echo "#CMT> Warning: $@: No rule for such target" >&2; exit
+	if echo $@ | grep '$(package)setup\.make$$' >/dev/null; then\
+	 echo "$(CMTMSGPREFIX)" "(testconfig.make): $@: File no longer generated" >&2; exit 0; fi
+else
+.DEFAULT::
+	$(echo) "(testconfig.make) PEDANTIC: $@: No rule for such target" >&2
+	if echo $@ | grep '$(package)setup\.make$$' >/dev/null; then\
+	 echo "$(CMTMSGPREFIX)" "(testconfig.make): $@: File no longer generated" >&2; exit 0;\
+	 elif test $@ = "$(cmt_final_setup)" -o\
+	 $@ = "$(cmt_final_setup_testconfig)" ; then\
+	 found=n; for s in 1 2 3 4 5; do\
+	 sleep $$s; test ! -f $@ || { found=y; break; }\
+	 done; if test $$found = n; then\
+	 test -z "$(cmtmsg)" ||\
+	 echo "$(CMTMSGPREFIX)" "(testconfig.make) PEDANTIC: $@: Seems to be missing. Ignore it for now" >&2; exit 0 ; fi;\
+	 elif test `expr $@ : '.*/'` -ne 0 ; then\
+	 test -z "$(cmtmsg)" ||\
+	 echo "$(CMTMSGPREFIX)" "(testconfig.make) PEDANTIC: $@: Seems to be a missing file. Please check" >&2; exit 2 ; \
+	 else\
+	 test -z "$(cmtmsg)" ||\
+	 echo "$(CMTMSGPREFIX)" "(testconfig.make) PEDANTIC: $@: Seems to be a fake target due to some pattern. Just ignore it" >&2 ; exit 0; fi
+endif
+
+testconfigclean ::
+#-- end of cleanup_header ---------------
+#-- start of cleanup_application ------
+	$(cleanup_echo) application testconfig
+	-$(cleanup_silent) cd $(bin); /bin/rm -f testconfig${application_suffix}
+#-- end of cleanup_application ------
+#-- start of cleanup_objects ------
+	$(cleanup_echo) objects testconfig
+	-$(cleanup_silent) /bin/rm -f $(bin)configuration.o $(bin)testconfig.o
+	-$(cleanup_silent) /bin/rm -f $(patsubst %.o,%.d,$(bin)configuration.o $(bin)testconfig.o) $(patsubst %.o,%.dep,$(bin)configuration.o $(bin)testconfig.o) $(patsubst %.o,%.d.stamp,$(bin)configuration.o $(bin)testconfig.o)
+	-$(cleanup_silent) cd $(bin); /bin/rm -rf testconfig_deps testconfig_dependencies.make
+#-- end of cleanup_objects ------

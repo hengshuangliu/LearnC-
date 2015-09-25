@@ -1,0 +1,1 @@
+configuration_cpp_dependencies =  ../src/configuration.cpp   ../src/configuration.h  $(bin)use_deps/configuration_cpp.stamp
